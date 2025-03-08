@@ -11,12 +11,19 @@ public class CountryEnumBuilder
     private readonly StringBuilder _enumBuilder;
     private readonly SortedList<string, RegionInfo> _regions;
 
-    public CountryEnumBuilder(string namespaceName, string fileName, Func<RegionInfo, string> stringPicker)
+    public CountryEnumBuilder(
+        string documentation,
+        string namespaceName,
+        string fileName,
+        Func<RegionInfo, string> stringPicker)
     {
         _regions = [];
         _stringPicker = stringPicker;
         _enumBuilder = new StringBuilder();
-        _enumBuilder.AppendLine($@"namespace {namespaceName};
+        _enumBuilder.AppendLine($@"namespace {namespaceName}.Enum;
+/// <summary>
+/// {documentation}
+/// </summary>
 public enum {fileName}
 {{");
     }

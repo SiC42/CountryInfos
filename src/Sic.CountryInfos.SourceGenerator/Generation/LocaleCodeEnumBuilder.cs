@@ -13,7 +13,10 @@ public class LocaleCodeEnumBuilder
     {
         _cultures = new();
         _enumBuilder = new StringBuilder();
-        _enumBuilder.AppendLine($@"namespace {namespaceName};
+        _enumBuilder.AppendLine($@"namespace {namespaceName}.Enum;
+/// <summary>
+/// Represents the locale code.
+/// </summary>
 public enum LocaleCode
 {{");
     }

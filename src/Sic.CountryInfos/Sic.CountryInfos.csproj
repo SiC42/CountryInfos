@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <RootNamespace>Sic.CountryInfos</RootNamespace>
+
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <Deterministic>true</Deterministic>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>Sic.CountryInfos</PackageId>
+        <Description>Library cotaining country information.</Description>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageTags>country information,iso3166</PackageTags>
+        <Version>0.9.0</Version>
+        <Authors>Simon Bordewisch</Authors>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <EnablePackageValidation>true</EnablePackageValidation>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+        <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\"/>
+        <None Include="../../LICENSE" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sic.CountryInfos.SourceGenerator\Sic.CountryInfos.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+</Project>

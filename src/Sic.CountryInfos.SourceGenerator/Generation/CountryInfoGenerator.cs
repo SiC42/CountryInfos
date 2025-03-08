@@ -16,7 +16,7 @@ public class CountryInfoGenerator
 
     public string GetCountryStatic(IDictionary<RegionInfo, List<CultureInfo>> regionWithCultures)
     {
-        return $@"
+        return $@"using {_namespaceName}.Enum;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -65,6 +65,9 @@ public class CountryInfo
         Country = country;
         SupportedLocales = supportedLocales.ToList().AsReadOnly();
     }}
+
+    /// <inheritdoc />
+    public bool Equals(CountryInfo other) => TwoLetterIsoCode == other.TwoLetterIsoCode;
     
     /// <summary>
     /// Contains all countries of this package.
@@ -113,7 +116,7 @@ public class CountryInfo
     {
         var sb = new StringBuilder();
         sb.AppendLine("\n\t\t{");
-        foreach (var kvp in regionWithCultures)
+        foreach (var kvp in regionWithCultures.OrderBy(kvp => kvp.Key.EnglishName))
         {
             sb.Append("\t\t\t");
             sb.AppendLine(CreateInstance(kvp.Key, kvp.Value));

@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Immutable;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Sic.CountryInfos.SourceGenerator.Generation;
@@ -10,7 +13,7 @@ namespace Sic.CountryInfos.SourceGenerator;
 /// When using a simple text file as a baseline, we can create a non-incremental source generator.
 /// </summary>
 [Generator]
-public class SampleSourceGenerator : ISourceGenerator
+public class CountryInfoSourceGenerator : ISourceGenerator
 {
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -19,8 +22,15 @@ public class SampleSourceGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        // If you would like to put some data to non-compilable file (e.g. a .txt file), mark it as an Additional File.
+        context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.rootnamespace", out var rootNamespace);
 
+        string namespaceName =
+            context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.siccountryinfoscustomnamespace", out var ns)
+                ? ns
+                : rootNamespace!;
+
+        var additionalFile = context.AdditionalFiles.FirstOrDefault(f => f.Path.EndsWith("Countries.txt"));
+        var filter = DetermineFilter(additionalFile);
 
         var regionInfos = CultureInfo.GetCultures(CultureTypes.AllCultures)
             .Where(x => x.IsNeutralCulture is false)
@@ -28,23 +38,28 @@ public class SampleSourceGenerator : ISourceGenerator
             .Select(c => (CultureInfo: c, RegionInfo: CreateRegionInfo(c)))
             .Where(t => t.RegionInfo is not null)
             .Where(t => t.RegionInfo!.IsLetters())
+            .Where(c => filter(c.RegionInfo!))
             .GroupBy(t => t.RegionInfo!)
             .ToDictionary(g => g.Key,
                 g => g.Select(t => t.CultureInfo).ToList());
 
+
         var countryIso2Builder = new CountryEnumBuilder(
-            "Sic.CountryInfos",
+            "Represents the ISO 3166 ALPHA-2 code of a country.",
+            namespaceName,
             Constants.CountryIso2CodeName,
             r => r.TwoLetterISORegionName);
         var countryIso3Builder = new CountryEnumBuilder(
-            "Sic.CountryInfos",
+            "Represents the ISO 3166 ALPHA-3 code of a country.",
+            namespaceName,
             Constants.CountryIso3CodeName,
             r => r.ThreeLetterISORegionName);
         var countryIsoBuilder = new CountryEnumBuilder(
-            "Sic.CountryInfos",
+            "Represents a country.",
+            namespaceName,
             Constants.CountryEnumName,
             Constants.GetCountryName);
-        var localeCodeEnumBuilder = new LocaleCodeEnumBuilder("Sic.CountryInfos");
+        var localeCodeEnumBuilder = new LocaleCodeEnumBuilder(namespaceName);
 
         foreach (var kvp in regionInfos)
         {
@@ -63,9 +78,42 @@ public class SampleSourceGenerator : ISourceGenerator
         context.AddSource($"{Constants.CountryEnumName}.g.cs", countryIsoBuilder.Build());
         context.AddSource("LocaleCode.g.cs", localeCodeEnumBuilder.Build());
 
-        var countryInfoGenerator = new CountryInfoGenerator("Sic.CountryInfos");
+        var countryInfoGenerator = new CountryInfoGenerator(namespaceName);
         var countryInfoSource = countryInfoGenerator.GetCountryStatic(regionInfos);
         context.AddSource("CountryInfoStatic.g.cs", countryInfoSource);
+        context.AddSource("CountryInfoEnumExtensions.g.cs", ExtensionBuilder.Create(namespaceName));
+    }
+
+    private static Func<RegionInfo, bool> DetermineFilter(AdditionalText? additionalFile)
+    {
+        if (additionalFile is null)
+        {
+            return _ => true;
+        }
+
+        var fileName = Path.GetFileName(additionalFile.Path);
+        var allowedCountries = additionalFile
+            .GetText()?
+            .Lines
+            .Select(l => l.ToString().Trim())
+            .ToImmutableHashSet();
+
+        if (allowedCountries is null)
+        {
+            return _ => true;
+        }
+
+        if (fileName.StartsWith("IsoCode2"))
+        {
+            return r => allowedCountries.Contains(r.TwoLetterISORegionName);
+        }
+
+        if (fileName.StartsWith("IsoCode3"))
+        {
+            return r => allowedCountries.Contains(r.ThreeLetterISORegionName);
+        }
+
+        return r => allowedCountries.Contains(r.EnglishName);
     }
 
     private static RegionInfo? CreateRegionInfo(CultureInfo x)
