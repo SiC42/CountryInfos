@@ -7,9 +7,6 @@ This project aims to create a source generator that generates a C# class for eac
 It uses the BCL's `RegionInfo` and `CultureInfo` class to get the data.
 Additionally, a second nuget package is present that contains the generated data.
 
-
-[ToC]
-
 ## Installation
 You may install the package from NuGet:
 ```bash
