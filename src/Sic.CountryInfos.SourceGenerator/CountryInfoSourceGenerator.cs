@@ -80,7 +80,7 @@ public class CountryInfoSourceGenerator : ISourceGenerator
 
         var countryInfoGenerator = new CountryInfoGenerator(namespaceName);
         var countryInfoSource = countryInfoGenerator.GetCountryStatic(regionInfos);
-        context.AddSource("CountryInfoStatic.g.cs", countryInfoSource);
+        context.AddSource("CountryInfo.g.cs", countryInfoSource);
         context.AddSource("CountryInfoEnumExtensions.g.cs", ExtensionBuilder.Create(namespaceName));
     }
 

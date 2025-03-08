@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{304BFADA-B
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
 		README.MD = README.MD
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ECF13CA6-EDF7-4FA1-9DE6-15B82142313F}"
