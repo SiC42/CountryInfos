@@ -30,7 +30,7 @@ public class CountryInfoSourceGenerator : ISourceGenerator
                 : rootNamespace!;
 
         var additionalFile = context.AdditionalFiles.FirstOrDefault(f => f.Path.EndsWith("Countries.txt"));
-        var filter = DetermineFilter(additionalFile);
+        var filter = DetermineFilter(additionalFile, context);
 
         var regionInfos = CultureInfo.GetCultures(CultureTypes.AllCultures)
             .Where(x => x.IsNeutralCulture is false)
@@ -84,7 +84,9 @@ public class CountryInfoSourceGenerator : ISourceGenerator
         context.AddSource("CountryInfoEnumExtensions.g.cs", ExtensionBuilder.Create(namespaceName));
     }
 
-    private static Func<RegionInfo, bool> DetermineFilter(AdditionalText? additionalFile)
+    private static Func<RegionInfo, bool> DetermineFilter(
+        AdditionalText? additionalFile,
+        GeneratorExecutionContext context)
     {
         if (additionalFile is null)
         {

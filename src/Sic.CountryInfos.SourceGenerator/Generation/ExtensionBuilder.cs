@@ -1,6 +1,6 @@
 namespace Sic.CountryInfos.SourceGenerator.Generation;
 
-public static class ExtensionBuilder
+internal static class ExtensionBuilder
 {
 
     public static string Create(string namespaceName)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Sic.CountryInfos.SourceGenerator.Generation;
 
-public class LocaleCodeEnumBuilder
+internal class LocaleCodeEnumBuilder
 {
     private readonly StringBuilder _enumBuilder;
     private readonly SortedList<string, CultureInfo> _cultures;
@@ -32,7 +32,7 @@ public enum LocaleCode
         foreach (var culture in _cultures.Values)
         {
             _enumBuilder.AppendLine($@"    /// <summary>
-    /// {culture.EnglishName} - {culture.Name}
+    /// {culture.EnglishName.Replace("&", "&amp;")} - {culture.Name}
     /// </summary>
     {culture.Name.Replace("-", "_")} = {culture.LCID},");
         }

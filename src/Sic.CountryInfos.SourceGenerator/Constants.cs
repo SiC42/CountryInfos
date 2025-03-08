@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Sic.CountryInfos.SourceGenerator;
 
-internal class Constants
+internal static class Constants
 {
     public const string CountryEnumName = "Country";
     public const string CountryIso2CodeName = "CountryIso2Code";

@@ -24,7 +24,6 @@
         <Authors>Simon Bordewisch</Authors>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <EnablePackageValidation>true</EnablePackageValidation>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
 

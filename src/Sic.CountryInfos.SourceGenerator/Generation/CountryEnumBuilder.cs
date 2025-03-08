@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sic.CountryInfos.SourceGenerator.Generation;
 
-public class CountryEnumBuilder
+internal class CountryEnumBuilder
 {
     private readonly Func<RegionInfo, string> _stringPicker;
     private readonly StringBuilder _enumBuilder;
@@ -39,7 +39,7 @@ public enum {fileName}
         foreach (var region in _regions.Values)
         {
             _enumBuilder.AppendLine($@"    /// <summary>
-    /// {region.EnglishName} - {region.Name}
+    /// {region.EnglishName.Replace("&", "&amp;")} - {region.Name}
     /// </summary>
     {_stringPicker(region)} = {region.GeoId},");
         }

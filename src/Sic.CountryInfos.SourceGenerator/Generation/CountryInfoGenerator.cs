@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sic.CountryInfos.SourceGenerator.Generation;
 
-public class CountryInfoGenerator
+internal class CountryInfoGenerator
 {
     private readonly string _namespaceName;
 
