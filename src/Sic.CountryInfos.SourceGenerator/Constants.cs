@@ -1,3 +1,6 @@
+using System;
+using System.Globalization;
+
 namespace Sic.CountryInfos.SourceGenerator;
 
 internal static class Constants
