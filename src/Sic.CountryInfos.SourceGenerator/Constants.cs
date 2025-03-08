@@ -1,6 +1,3 @@
-using System;
-using System.Globalization;
-
 namespace Sic.CountryInfos.SourceGenerator;
 
 internal static class Constants
@@ -15,5 +12,6 @@ internal static class Constants
         .Replace("&", "And")
         .Replace("’", string.Empty)
         .Replace("(", string.Empty)
-        .Replace(")", string.Empty);
+        .Replace(")", string.Empty)
+        .Replace("-", string.Empty);
 }

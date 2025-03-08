@@ -1,40 +1,49 @@
-using System;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using Microsoft.CodeAnalysis;
 using Sic.CountryInfos.SourceGenerator.Generation;
 
 namespace Sic.CountryInfos.SourceGenerator;
 
-/// <summary>
-/// A sample source generator that creates C# classes based on the text file (in this case, Domain Driven Design ubiquitous language registry).
-/// When using a simple text file as a baseline, we can create a non-incremental source generator.
-/// </summary>
 [Generator]
-public class CountryInfoSourceGenerator : ISourceGenerator
+public class CountryInfoSourceGenerator : IIncrementalGenerator
 {
-    public void Initialize(GeneratorInitializationContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // No initialization required for this generator.
+        // Get the configuration options
+        var configOptions = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) => GetNamespace(options.GlobalOptions));
+
+        // Get the additional file if it exists
+        var additionalFile = context.AdditionalTextsProvider
+            .Where(file => file.Path.EndsWith("Countries.txt"))
+            .Select((file, _) => (file.Path, file.GetText()?.ToString() ?? string.Empty))
+            .Select(static (file, _) => file);
+
+        // Combine the inputs and generate the source
+        var combined = context.CompilationProvider.Combine(configOptions).Select((t, i) => t.Right).Combine(additionalFile.Collect());
+        //var combined = additionalFile.Combine(configOptions);
+
+        context.RegisterSourceOutput(combined, (spc, source) =>
+        {
+            var (namespaceName, additionalFileInfo ) = source;
+            var filter = DetermineFilter(additionalFileInfo);
+            var regionInfos = GetRegionInfos(filter);
+
+            GenerateOutput(spc, namespaceName, regionInfos);
+        });
     }
 
-    public void Execute(GeneratorExecutionContext context)
+    private static string GetNamespace(
+        AnalyzerConfigOptions options)
     {
-        context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.rootnamespace", out var rootNamespace);
+        options.TryGetValue("build_property.rootnamespace", out var rootNamespace);
+        options.TryGetValue("build_property.siccountryinfoscustomnamespace", out var customNamespace);
 
-        string namespaceName =
-            context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.siccountryinfoscustomnamespace", out var ns)
-                ? ns
-                : rootNamespace!;
+        return customNamespace ?? rootNamespace ?? string.Empty;
+    }
 
-        var additionalFile = context.AdditionalFiles.FirstOrDefault(f => f.Path.EndsWith("Countries.txt"));
-        var filter = DetermineFilter(additionalFile, context);
-
-        var regionInfos = CultureInfo.GetCultures(CultureTypes.AllCultures)
-            .Where(x => x.IsNeutralCulture is false)
-            .Where(x => x.Equals(CultureInfo.InvariantCulture) is false)
+    private static Dictionary<RegionInfo, List<CultureInfo>> GetRegionInfos(Func<RegionInfo, bool> filter)
+    {
+        return CultureInfo.GetCultures(CultureTypes.AllCultures)
+            .Where(x => !x.IsNeutralCulture && !x.Equals(CultureInfo.InvariantCulture))
             .Select(c => (CultureInfo: c, RegionInfo: CreateRegionInfo(c)))
             .Where(t => t.RegionInfo is not null)
             .Where(t => t.RegionInfo!.IsLetters())
@@ -42,8 +51,11 @@ public class CountryInfoSourceGenerator : ISourceGenerator
             .GroupBy(t => t.RegionInfo!)
             .ToDictionary(g => g.Key,
                 g => g.Select(t => t.CultureInfo).ToList());
+    }
 
-
+    private static void GenerateOutput(SourceProductionContext context, string namespaceName,
+        Dictionary<RegionInfo, List<CultureInfo>> regionInfos)
+    {
         var countryIso2Builder = new CountryEnumBuilder(
             "Represents the ISO 3166 ALPHA-2 code of a country.",
             namespaceName,
@@ -84,26 +96,20 @@ public class CountryInfoSourceGenerator : ISourceGenerator
         context.AddSource("CountryInfoEnumExtensions.g.cs", ExtensionBuilder.Create(namespaceName));
     }
 
-    private static Func<RegionInfo, bool> DetermineFilter(
-        AdditionalText? additionalFile,
-        GeneratorExecutionContext context)
+    private static Func<RegionInfo, bool> DetermineFilter(ImmutableArray<(string Path, string Content)> additionalFiles)
     {
-        if (additionalFile is null)
+        var additionalFile = additionalFiles.FirstOrDefault();
+        if (string.IsNullOrEmpty(additionalFile.Content))
         {
             return _ => true;
         }
 
         var fileName = Path.GetFileName(additionalFile.Path);
-        var allowedCountries = additionalFile
-            .GetText()?
-            .Lines
-            .Select(l => l.ToString().Trim())
+        var allowedCountries = additionalFile.Content
+            .Split('\n')
+            .Select(l => l.Trim())
+            .Where(l => string.IsNullOrWhiteSpace(l) is false)
             .ToImmutableHashSet();
-
-        if (allowedCountries is null)
-        {
-            return _ => true;
-        }
 
         if (fileName.StartsWith("IsoCode2"))
         {

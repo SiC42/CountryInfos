@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <RootNamespace>Sic.CountryInfos</RootNamespace>
-
     </PropertyGroup>
+
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
