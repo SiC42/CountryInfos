@@ -20,10 +20,24 @@ public class LanguageInfoGenerator
 using System.Collections.Generic;
 using System.Linq;
 namespace {_namespaceName};
+/// <summary>
+/// Contains information about a language.
+/// </summary>
 public class LanguageInfo
 {{
+    /// <summary>
+    /// The ISO 639-1 code of the language.
+    /// </summary>
     public {Constants.LanguageIso2CodeEnumName} LanguageIso2Code {{ get; }}
+    
+    /// <summary>
+    /// The ISO 639-2 code of the language.
+    /// </summary>
     public {Constants.LanguageIso3CodeEnumName} LanguageIso3Code {{ get; }}
+
+    /// <summary>
+    /// The locales of the language.
+    /// </summary>
     public IReadOnlyCollection<{Constants.LocaleCodeEnumName}> LocaleCodes {{ get; }}
     
     private LanguageInfo(
@@ -57,6 +71,9 @@ public class LanguageInfo
 
     private static readonly IReadOnlyDictionary<int, LanguageInfo> _byLcid;
 
+    /// <summary>
+    /// Gets the language by the locale code.
+    /// </summary>
     public static LanguageInfo Get({Constants.LocaleCodeEnumName} localeCode) => _byLcid[(int)localeCode];
     
     static LanguageInfo()
