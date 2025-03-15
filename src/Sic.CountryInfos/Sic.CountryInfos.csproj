@@ -17,7 +17,7 @@
         <Description>Library cotaining country information.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageTags>country information,iso3166</PackageTags>
-        <Version>0.9.0</Version>
+        <Version>0.10.0</Version>
         <Authors>Simon Bordewisch</Authors>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
