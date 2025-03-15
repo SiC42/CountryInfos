@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text;
+
 namespace Sic.CountryInfos.SourceGenerator.Generation;
 
 internal class CountryEnumBuilder
