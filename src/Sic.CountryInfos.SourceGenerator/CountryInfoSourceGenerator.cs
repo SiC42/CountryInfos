@@ -79,7 +79,27 @@ public class CountryInfoSourceGenerator : IIncrementalGenerator
             namespaceName,
             Constants.CountryEnumName,
             Constants.GetCountryName);
-        var localeCodeEnumBuilder = new LocaleCodeEnumBuilder(namespaceName);
+        var localeCodeEnumBuilder = new LanguageEnumBuilder("""
+                                                            Represents the locale code
+                                                            /// <seealso href='https://en.wikipedia.org/wiki/Locale_(computer_software)'/>
+                                                            """,
+            namespaceName,
+            Constants.LocaleCodeEnumName,
+            c => c.Name.Replace("-", "_"),
+            t => t.Culture.LCID);
+
+        var alpha2CodeBuilder = new LanguageEnumBuilder(
+            "Represents the ISO 3166 ALPHA-2 code of a language.",
+            namespaceName,
+            Constants.LanguageIso2CodeEnumName,
+            c => c.TwoLetterISOLanguageName.ToUpper(),
+            t => t.Index); // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
+        var alpha3CodeBuilder = new LanguageEnumBuilder(
+            "Represents the ISO 3166 ALPHA-3 code of a language.",
+            namespaceName,
+            Constants.LanguageIso3CodeEnumName,
+            c => c.ThreeLetterISOLanguageName.ToUpper(),
+            t => t.Index); // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
 
         foreach (var kvp in regionInfos)
         {
@@ -90,18 +110,31 @@ public class CountryInfoSourceGenerator : IIncrementalGenerator
             foreach (var locale in locales)
             {
                 localeCodeEnumBuilder.AddLocaleCode(locale);
+                alpha2CodeBuilder.AddLocaleCode(locale);
+                alpha3CodeBuilder.AddLocaleCode(locale);
             }
+
         }
 
         context.AddSource($"{Constants.CountryIso2CodeName}.g.cs", countryIso2Builder.Build());
         context.AddSource($"{Constants.CountryIso3CodeName}.g.cs", countryIso3Builder.Build());
         context.AddSource($"{Constants.CountryEnumName}.g.cs", countryIsoBuilder.Build());
-        context.AddSource("LocaleCode.g.cs", localeCodeEnumBuilder.Build());
+        context.AddSource($"{Constants.LocaleCodeEnumName}.g.cs", localeCodeEnumBuilder.Build());
+        context.AddSource($"{Constants.LanguageIso2CodeEnumName}.g.cs", alpha2CodeBuilder.Build());
+        context.AddSource($"{Constants.LanguageIso3CodeEnumName}.g.cs", alpha3CodeBuilder.Build());
 
         var countryInfoGenerator = new CountryInfoGenerator(namespaceName);
-        var countryInfoSource = countryInfoGenerator.GetCountryStatic(regionInfos);
+        var countryInfoSource = countryInfoGenerator.GetCountryClass(regionInfos);
         context.AddSource("CountryInfo.g.cs", countryInfoSource);
         context.AddSource("CountryInfoEnumExtensions.g.cs", ExtensionBuilder.Create(namespaceName));
+
+        var languageInfoGenerator = new LanguageInfoGenerator(namespaceName);
+        var cultureInfos = regionInfos.Values
+            .SelectMany(c => c)
+            //.Distinct()
+            .ToList();
+        var languageInfoSource = languageInfoGenerator.GetLanguageClass(cultureInfos);
+        context.AddSource("LanguageInfo.g.cs", languageInfoSource);
     }
 
     private static Func<RegionInfo, bool> DetermineFilter(ImmutableArray<(string Path, string Content)> additionalFiles)

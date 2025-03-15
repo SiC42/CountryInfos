@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 
@@ -20,7 +21,7 @@ internal class CountryEnumBuilder
         _regions = [];
         _stringPicker = stringPicker;
         _enumBuilder = new StringBuilder();
-        _enumBuilder.AppendLine($@"namespace {namespaceName}.Enum;
+        _enumBuilder.AppendLine($@"namespace {namespaceName}.Enums;
 /// <summary>
 /// {documentation}
 /// </summary>
@@ -31,6 +32,11 @@ public enum {fileName}
     public void AddCountry(RegionInfo region)
     {
         _regions.Add(_stringPicker(region), region);
+    }
+
+    private void Test(Dictionary<int, int> t)
+    {
+        new ReadOnlyDictionary<int, int>(t);
     }
 
 

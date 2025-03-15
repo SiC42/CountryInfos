@@ -5,7 +5,7 @@ internal static class ExtensionBuilder
 
     public static string Create(string namespaceName)
     {
-        return $@"using {namespaceName}.Enum;
+        return $@"using {namespaceName}.Enums;
 namespace {namespaceName};
 /// <summary>
 /// Provides extension methods for the country enums.

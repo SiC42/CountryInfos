@@ -14,11 +14,10 @@ internal class CountryInfoGenerator
         _namespaceName = namespaceName;
     }
 
-    public string GetCountryStatic(IDictionary<RegionInfo, List<CultureInfo>> regionWithCultures)
+    public string GetCountryClass(IDictionary<RegionInfo, List<CultureInfo>> regionWithCultures)
     {
-        return $@"using {_namespaceName}.Enum;
+        return $@"using {_namespaceName}.Enums;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 namespace {_namespaceName};
 
@@ -48,22 +47,35 @@ public class CountryInfo
     public string EnglishName {{ get; }}
     
     /// <summary>
-    /// The supported locales of the country.
+    /// The locales of the country.
     /// </summary>
-    public IReadOnlyList<LocaleCode> SupportedLocales {{ get; }}
+    public IReadOnlyList<{Constants.LocaleCodeEnumName}> Locales {{ get; }}
 
-    internal CountryInfo(
+    /// <summary>
+    /// The supported ISO 3166 ALPHA-2 code languages of the country.
+    /// </summary>
+    public IReadOnlyList<{Constants.LanguageIso2CodeEnumName}> SupportedIso2CodeLanguages {{ get; }}
+
+    /// <summary>
+    /// The supported ISO 3166 ALPHA-3 code languages of the country.
+    /// </summary>
+    public IReadOnlyList<{Constants.LanguageIso3CodeEnumName}> SupportedIso3CodeLanguages {{ get; }}
+
+    private CountryInfo(
         string name, 
         {Constants.CountryIso2CodeName} twoLetterIsoCode, 
         {Constants.CountryIso3CodeName} threeLetterIsoCode,
         {Constants.CountryEnumName} country,
-        ICollection<LocaleCode> supportedLocales)
+        IEnumerable<{Constants.LocaleCodeEnumName}> supportedLocales)
     {{
         EnglishName = name;
         TwoLetterIsoCode = twoLetterIsoCode;
         ThreeLetterIsoCode = threeLetterIsoCode;
         Country = country;
-        SupportedLocales = supportedLocales.ToList().AsReadOnly();
+        Locales = supportedLocales.ToList().AsReadOnly();
+        var languages = Locales.Select(LanguageInfo.Get).ToList();
+        SupportedIso2CodeLanguages = languages.Select(l => l.LanguageIso2Code).ToList().AsReadOnly();
+        SupportedIso3CodeLanguages = languages.Select(l => l.LanguageIso3Code).ToList().AsReadOnly();
     }}
 
     /// <inheritdoc />
@@ -74,11 +86,9 @@ public class CountryInfo
     /// </summary>
     public static readonly IReadOnlyList<CountryInfo> All;
     
-    private static readonly IReadOnlyDictionary<int, CountryInfo> _byLcid = All
-        .SelectMany(c => c.SupportedLocales.Select(l => (LocaleCode: l, Country: c)))
-        .ToImmutableDictionary(t => (int)t.LocaleCode, t => t.Country);
+    private static readonly IReadOnlyDictionary<int, CountryInfo> _byLcid;
     
-    private static readonly IReadOnlyDictionary<int, CountryInfo> _byGeoId = All.ToImmutableDictionary(c => (int)c.Country);
+    private static readonly IReadOnlyDictionary<int, CountryInfo> _byGeoId;
     
     /// <summary>
     /// Gets the country information for the specified locale.
@@ -107,7 +117,11 @@ public class CountryInfo
     
     static CountryInfo()
     {{
-        All = new List<CountryInfo> {GetCountries(regionWithCultures)}
+        All = new List<CountryInfo> {GetCountries(regionWithCultures)}.AsReadOnly();
+        _byLcid = All
+        .SelectMany(c => c.Locales.Select(l => (LocaleCode: l, Country: c)))
+        .ToDictionary(t => (int)t.LocaleCode, t => t.Country);
+        _byGeoId = All.ToDictionary(c => (int)c.Country);
     }}
 }}";
     }
@@ -121,7 +135,7 @@ public class CountryInfo
             sb.Append("\t\t\t");
             sb.AppendLine(CreateInstance(kvp.Key, kvp.Value));
         }
-        sb.AppendLine("\t\t};");
+        sb.AppendLine("\t\t}");
 
         return sb.ToString();
     }
