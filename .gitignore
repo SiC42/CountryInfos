@@ -7,3 +7,4 @@ riderModule.iml
 .idea
 out/
 *.nupkg
+/tests/Sic.CountryInfos.Tests/**/*.received.txt
