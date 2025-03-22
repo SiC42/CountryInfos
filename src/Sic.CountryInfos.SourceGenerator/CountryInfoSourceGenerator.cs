@@ -86,20 +86,27 @@ public class CountryInfoSourceGenerator : IIncrementalGenerator
             namespaceName,
             Constants.LocaleCodeEnumName,
             c => c.Name.Replace("-", "_"),
-            t => t.Culture.LCID);
+            t => t.Culture.LCID,
+            c => $"{c.EnglishName.Replace("&", "&amp;")} - {c.Name}"
+            );
 
         var alpha2CodeBuilder = new LanguageEnumBuilder(
             "Represents the ISO 3166 ALPHA-2 code of a language.",
             namespaceName,
             Constants.LanguageIso2CodeEnumName,
             c => c.TwoLetterISOLanguageName.ToUpper(),
-            t => t.Index); // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
+            t => t.Index, // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
+            c => c.EnglishName.Split('(')[0].Trim()
+            );
+
         var alpha3CodeBuilder = new LanguageEnumBuilder(
             "Represents the ISO 3166 ALPHA-3 code of a language.",
             namespaceName,
             Constants.LanguageIso3CodeEnumName,
             c => c.ThreeLetterISOLanguageName.ToUpper(),
-            t => t.Index); // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
+            t => t.Index, // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
+            c => c.EnglishName.Split('(')[0].Trim()
+        );
 
         foreach (var kvp in regionInfos)
         {
