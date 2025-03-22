@@ -8,38 +8,45 @@ public class EnumTest
     [Fact]
     public Task VerifyCountry()
     {
-        return Verify(Enum.GetNames<Country>());
+        return VerifyEnum<Country>();
     }
 
     [Fact]
     public Task VerifyCountryIso2Code()
     {
-        return Verify(Enum.GetNames<CountryIso2Code>());
+        return VerifyEnum<CountryIso2Code>();
     }
 
     [Fact]
     public Task VerifyCountryIso3Code()
     {
-        return Verify(Enum.GetNames<CountryIso3Code>());
+        return VerifyEnum<CountryIso3Code>();
     }
 
     [Fact]
     public Task VerifyLanguageIso2Code()
     {
-        return Verify(Enum.GetNames<LanguageIso2Code>());
+        return VerifyEnum<LanguageIso2Code>();
     }
 
 
     [Fact]
     public Task VerifyLanguageIso3Code()
     {
-        return Verify(Enum.GetNames<LanguageIso3Code>());
+        return VerifyEnum<LanguageIso3Code>();
     }
 
     [Fact]
     public Task VerifyLocaleCode()
     {
-        return Verify(Enum.GetNames<LocaleCode>());
+        return VerifyEnum<LocaleCode>();
+    }
+
+    public async Task VerifyEnum<T>() where T : struct, Enum
+    {
+        Dictionary<string, int> enumValues = Enum.GetValues<T>()
+            .ToDictionary(v => Enum.GetName(v)!, v => Convert.ToInt32(v));
+        await Verify(enumValues);
     }
 
 
