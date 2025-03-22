@@ -42,7 +42,7 @@ public class EnumTest
         return VerifyEnum<LocaleCode>();
     }
 
-    public async Task VerifyEnum<T>() where T : struct, Enum
+    private async Task VerifyEnum<T>() where T : struct, Enum
     {
         Dictionary<string, int> enumValues = Enum.GetValues<T>()
             .ToDictionary(v => Enum.GetName(v)!, v => Convert.ToInt32(v));
