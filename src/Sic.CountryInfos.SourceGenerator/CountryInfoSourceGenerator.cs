@@ -80,31 +80,40 @@ public class CountryInfoSourceGenerator : IIncrementalGenerator
             Constants.CountryEnumName,
             Constants.GetCountryName);
         var localeCodeEnumBuilder = new LanguageEnumBuilder("""
-                                                            Represents the locale code
+                                                            /// <summary>
+                                                            /// Represents the locale code
+                                                            /// </summary>
                                                             /// <seealso href='https://en.wikipedia.org/wiki/Locale_(computer_software)'/>
                                                             """,
             namespaceName,
             Constants.LocaleCodeEnumName,
             c => c.Name.Replace("-", "_"),
-            t => t.Culture.LCID,
             c => $"{c.EnglishName.Replace("&", "&amp;")} - {c.Name}"
             );
 
         var alpha2CodeBuilder = new LanguageEnumBuilder(
-            "Represents the ISO 3166 ALPHA-2 code of a language.",
+            """
+            /// <summary>
+            /// Represents the ISO 3166 ALPHA-2 code of a language.
+            /// </summary>
+            /// <remarks>The value is the lowest LCID of the language.</remarks>
+            """,
             namespaceName,
             Constants.LanguageIso2CodeEnumName,
             c => c.TwoLetterISOLanguageName.ToUpper(),
-            t => t.Index, // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
             c => c.EnglishName.Split('(')[0].Trim()
             );
 
         var alpha3CodeBuilder = new LanguageEnumBuilder(
-            "Represents the ISO 3166 ALPHA-3 code of a language.",
+            """
+            /// <summary>
+            /// Represents the ISO 3166 ALPHA-2 code of a language.
+            /// </summary>
+            /// <remarks>The value is the lowest LCID of the language.</remarks>
+            """,
             namespaceName,
             Constants.LanguageIso3CodeEnumName,
             c => c.ThreeLetterISOLanguageName.ToUpper(),
-            t => t.Index, // unfortunately, we can't use the LCID as the ID, as there are multiple cultures with the same LCID
             c => c.EnglishName.Split('(')[0].Trim()
         );
 

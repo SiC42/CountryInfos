@@ -59,16 +59,14 @@ public class LanguageInfo
     /// </summary>
     public static readonly IReadOnlyList<LanguageInfo> All;
     
-    private static readonly IReadOnlyDictionary<int, LanguageInfo> _byId;
-    
     /// <summary>
     /// Gets the language by the ISO 639-1 code.
     /// </summary>
-    public static LanguageInfo Get({Constants.LanguageIso2CodeEnumName} languageCode) => _byId[(int)languageCode];
+    public static LanguageInfo Get({Constants.LanguageIso2CodeEnumName} languageCode) => _byLcid[(int)languageCode];
     /// <summary>
     /// Gets the language by the ISO 639-2 code.
     /// </summary>
-    public static LanguageInfo Get({Constants.LanguageIso3CodeEnumName} languageCode) => _byId[(int)languageCode];
+    public static LanguageInfo Get({Constants.LanguageIso3CodeEnumName} languageCode) => _byLcid[(int)languageCode];
 
     private static readonly IReadOnlyDictionary<int, LanguageInfo> _byLcid;
 
@@ -80,7 +78,6 @@ public class LanguageInfo
     static LanguageInfo()
     {{
         All = new List<LanguageInfo> {GetLanguages(cultures)}
-        _byId = All.ToDictionary(l => (int)l.LanguageIso2Code);
         _byLcid = All
         .SelectMany(l => l.LocaleCodes.Select(lc => (LocaleCode: lc, Language: l)))
         .ToDictionary(t => (int)t.LocaleCode, t => t.Language);
