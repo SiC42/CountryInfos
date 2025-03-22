@@ -71,6 +71,9 @@ You might want to use the source generator, if you would like to
 - change the root namespace of the generated classes
 - filter the countries (and its locales) that should be generated
 
+⚠ As the source generator uses the `CultureInfo` implementation to get the data,
+the output is dependent on your installed culture info data on your OS.
+
 Install the generator via
 ```bash
 dotnet add package Sic.CountryInfos.SourceGenerator
